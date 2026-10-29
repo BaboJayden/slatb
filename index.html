@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="GNFS 예상 연산량과 모듈러 주기 찾기를 계산하는 시뮬레이터" />
+  <title>소인수분해 시뮬레이터</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="./app.js" defer></script>
+  <script src="./bloch.js" defer></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <div>
+        <p class="eyebrow">RSA · SHOR TOOL</p>
+        <h1>소인수분해 시뮬레이터</h1>
+      </div>
+      <div class="status"><span></span> 브라우저에서 즉시 계산</div>
+    </header>
+
+    <nav class="tabs" aria-label="시뮬레이터 선택">
+      <button class="tab active" data-panel="complexity" aria-selected="true">GNFS 예상 연산량</button>
+      <button class="tab" data-panel="period" aria-selected="false">주기 찾기</button>
+      <button class="tab" data-panel="bloch" aria-selected="false">블로흐 구 · 양자 게이트</button>
+    </nav>
+
+    <section id="complexity" class="panel active">
+      <div class="control-card">
+        <div class="card-head">
+          <span class="index">01</span>
+          <h2>GNFS 예상 연산량</h2>
+        </div>
+
+        <div class="form-grid">
+          <label>
+            <span>소인수분해할 수 N</span>
+            <textarea id="number-input" rows="5" inputmode="numeric" spellcheck="false">100000000000000000000000000000000000000000000000000000000000000000000000000003</textarea>
+          </label>
+          <label>
+            <span>초당 연산 속도</span>
+            <select id="ops-speed">
+              <option value="6">10⁶ / sec</option>
+              <option value="9" selected>10⁹ / sec</option>
+              <option value="12">10¹² / sec</option>
+              <option value="15">10¹⁵ / sec</option>
+              <option value="18">10¹⁸ / sec</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="presets" aria-label="숫자 예제">
+          <button data-number="15">15</button>
+          <button data-number="3233">3,233</button>
+          <button data-digits="20">20자리</button>
+          <button data-digits="50">50자리</button>
+          <button data-digits="100" class="selected">100자리</button>
+          <button data-digits="617">RSA-2048 크기</button>
+        </div>
+
+        <button id="calculate-complexity" class="primary">SIMULATE</button>
+        <p id="complexity-error" class="error" role="alert"></p>
+      </div>
+
+      <div class="results-card" aria-live="polite">
+        <div class="result-label">예상 작업량</div>
+        <div id="work-result" class="hero-number">1.5 × 10<sup>35</sup></div>
+        <div class="metric-row">
+          <div><span>입력 크기</span><strong id="normalized-size">333 bits · 100 digits</strong></div>
+          <div><span>예상 연산</span><strong id="operation-result">1.8 × 10¹⁹회</strong></div>
+          <div><span>예상 시간</span><strong id="time-result">약 4.9 × 10¹⁸년</strong></div>
+        </div>
+
+        <div class="formula-box">
+          <span>L<sub>N</sub>[1/3, (64/9)<sup>1/3</sup>]</span>
+          <code>exp((64/9)<sup>1/3</sup> · (ln N)<sup>1/3</sup> · (ln ln N)<sup>2/3</sup>)</code>
+        </div>
+
+        <div class="time-visual" id="time-visual">
+          <div class="time-marker" id="time-marker"></div>
+          <div class="time-stop" style="left:0%"><i></i><span>1초</span></div>
+          <div class="time-stop" style="left:28%"><i></i><span>1일</span></div>
+          <div class="time-stop" style="left:43%"><i></i><span>1년</span></div>
+          <div class="time-stop" style="left:77%"><i></i><span>100만 년</span></div>
+          <div class="time-stop" style="left:100%"><i></i><span>우주 나이</span></div>
+        </div>
+        <p class="microcopy">GNFS 점근적 복잡도를 수치화한 비교용 추정치</p>
+      </div>
+    </section>
+
+    <section id="period" class="panel">
+      <div class="control-card">
+        <div class="card-head">
+          <span class="index">02</span>
+          <h2>모듈러 주기 찾기</h2>
+        </div>
+        <div class="form-grid period-form">
+          <label>
+            <span>합성수 N</span>
+            <input id="period-n" type="number" min="3" max="100000" step="1" value="15" inputmode="numeric" />
+          </label>
+          <label>
+            <span>밑 a</span>
+            <input id="period-a" type="number" min="2" max="99999" step="1" value="2" inputmode="numeric" />
+          </label>
+        </div>
+        <div class="presets period-presets">
+          <button data-n="15" data-a="2" class="selected">N=15, a=2</button>
+          <button data-n="21" data-a="2">N=21, a=2</button>
+          <button data-n="35" data-a="2">N=35, a=2</button>
+          <button data-n="33" data-a="5">N=33, a=5</button>
+        </div>
+        <button id="find-period" class="primary">FIND PERIOD</button>
+        <p id="period-error" class="error" role="alert"></p>
+      </div>
+
+      <div class="results-card period-results" aria-live="polite">
+        <div class="period-summary">
+          <div><span>주기 r</span><strong id="period-r">4</strong></div>
+          <div><span>반복 검사</span><strong id="period-steps">4회</strong></div>
+          <div><span>인수 결과</span><strong id="factor-result">15 = 3 × 5</strong></div>
+        </div>
+
+        <div id="sequence" class="sequence" aria-label="모듈러 나머지 수열"></div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>x</th><th>a<sup>x</sup> mod N</th><th>상태</th></tr></thead>
+            <tbody id="period-table"></tbody>
+          </table>
+        </div>
+
+        <div id="factor-steps" class="factor-steps"></div>
+      </div>
+    </section>
+
+    <section id="bloch" class="panel bloch-panel">
+      <div class="control-card">
+        <div class="card-head"><span class="index">03</span><h2>양자 게이트 실험</h2></div>
+        <div class="bloch-state" aria-live="polite">
+          <span>현재 상태</span><strong id="ket-state">|ψ⟩ = 1.000|0⟩</strong><code id="angle-state">θ = 0.0° · φ = 0.0°</code>
+        </div>
+        <div class="gate-label">게이트 적용</div>
+        <div class="gate-grid" aria-label="양자 게이트">
+          <button class="gate" data-gate="X"><strong>X</strong><span>π around X</span></button>
+          <button class="gate" data-gate="Y"><strong>Y</strong><span>π around Y</span></button>
+          <button class="gate" data-gate="Z"><strong>Z</strong><span>π around Z</span></button>
+          <button class="gate" data-gate="H"><strong>H</strong><span>Hadamard</span></button>
+          <button class="gate" data-gate="S"><strong>S</strong><span>π/2 phase</span></button>
+          <button class="gate" data-gate="T"><strong>T</strong><span>π/4 phase</span></button>
+        </div>
+        <div class="state-presets" aria-label="기준 상태">
+          <button data-state="zero">|0⟩</button><button data-state="one">|1⟩</button><button data-state="plus">|+⟩</button><button data-state="minus">|−⟩</button><button data-state="plus-i">|+i⟩</button>
+        </div>
+        <div class="measure-actions">
+          <button id="measure-once">관측 1회</button><button id="measure-hundred">100회 표본</button>
+        </div>
+        <button id="reset-bloch" class="primary">RESET TO |0⟩</button>
+      </div>
+      <div class="results-card bloch-stage">
+        <div class="bloch-head">
+          <div><div class="result-label">BLOCH SPHERE</div><strong id="gate-status">상태벡터를 드래그하거나 게이트를 선택</strong></div>
+          <div class="vector-values" id="vector-values">x 0.000 · y 0.000 · z 1.000</div>
+        </div>
+        <canvas id="bloch-canvas" aria-label="드래그 가능한 블로흐 구"></canvas>
+        <div class="measurement" aria-live="polite">
+          <div><span>|0⟩ <b id="p-zero">100.0%</b></span><i><em id="bar-zero"></em></i><small id="count-zero">예상 확률</small></div>
+          <div><span>|1⟩ <b id="p-one">0.0%</b></span><i><em id="bar-one"></em></i><small id="count-one">예상 확률</small></div>
+        </div>
+        <div class="bloch-legend"><span><i class="legend-vector"></i>상태벡터 |ψ⟩</span><span><i class="legend-path"></i>게이트 회전 경로</span></div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
+
